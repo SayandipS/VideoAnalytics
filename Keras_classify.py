@@ -61,17 +61,21 @@ model.compile(optimizer = 'adam', loss = 'sparse_categorical_crossentropy', metr
 
 def generator():
  b=np.empty((0,480,704,3))
+ i=0
+ os.chdir("C:\\Users\\sayandip_sarkar\\Desktop\\pos_vid\\sample")
  while True:
-  os.chdir("/home/sayandip/img")
   for file in glob.glob("vid*.jpg"):
      x = ios.imread(file)
      a=np.expand_dims(x,axis=0)
      b=np.append(b,a,axis=0)
-  train_X=b
-  train_y=np.array([0,1,2,3])
+     i+=1
+     print("Loop:",i,",",file)
+     train_X=b
+  #print(shape(train_X))
+  train_y=np.array([0,1,2,3,0,1,2,3,0,1,2])
   #train_y=kutils.to_categorical(train_y, nb_classes=4)   
   ret_gen=(train_X,train_y)
- yield (ret_gen)
+  yield (ret_gen)
  
 training_generator = generator()
 
@@ -83,4 +87,3 @@ model.fit_generator(training_generator,samples_per_epoch=20, nb_epoch=10)
 # Save model 
 model.save('model_sbx.h5')
 print ("Model Saved")
-
