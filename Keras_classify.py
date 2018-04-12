@@ -8,6 +8,9 @@ import numpy as np
 import glob
 import os
 import imageio as ios 
+import string as str  
+
+
  
 #Define Model
 model = Sequential()
@@ -59,24 +62,42 @@ print("Model summary")
 print(model.summary())
 model.compile(optimizer = 'adam', loss = 'sparse_categorical_crossentropy', metrics = ['accuracy']) 
 
-def generator():
- while 1 :    
-  b=np.empty((0,480,704,3))
-  i=0
-  j=0
-  os.chdir("C:\\Users\\sayandip_sarkar\\Desktop\\pos_vid\\sample")
-  for file in glob.glob("vid*.jpg"):
+
+
+def generator():  
+ y_list=[]  
+ b=np.empty((0,480,704,3))
+ i=0  
+ os.chdir("/home/sayandip/img/all_by_name")
+ while 1:
+  for file in glob.glob("*vid*.jpg"):
      x = ios.imread(file)
      a=np.expand_dims(x,axis=0)
      b=np.append(b,a,axis=0)
      i+=1
      #print("Loop:",i,",",file)
+     if "customer_interaction" in file :
+        y_list.append(0)
+     elif "delivering_coffee" in file :
+         y_list.append(1)
+     elif "not_in_frame" in file :
+        y_list.append(2)  
+     elif "working_pos_vid" in file :
+        y_list.append(3)
+     else :          
+        y_list.append(2)
+     #print("for",i, "y_list",y_list)       
      train_X=b
-  #print(shape(train_X))
-  train_y=np.array([0,1,2,3,0,1,2,3,0,1,2])
-  #train_y=kutils.to_categorical(train_y, nb_classes=4)   
-  ret_gen=(train_X,train_y)
-  yield (ret_gen)
+#print(shape(train_X))
+     train_y=np.array(y_list)
+#print("Type of train_y ", type(train_y))
+#print(train_y)
+     ret_gen=(train_X,train_y)
+     yield (ret_gen)
+#print(ret_gen)
+#train_y=np.array([0,0,0,1,1,1,2,2,2,3,3,3])
+#train_y=kutils.to_categorical(train_y, nb_classes=4)
+
 
 
 training_generator = generator()
@@ -85,10 +106,7 @@ training_generator = generator()
 #train_data, validation_data = train_test_split(raw_data, test_size=0.2)
       
 #model.fit_generator(training_generator, samples_per_epoch=42 , nb_epoch=10, verbose=2)
-model.fit_generator(training_generator,samples_per_epoch=10, nb_epoch=10)
-# Save model 
-#model.save('model_sbx.h5')
-#print ("Model Saved")
-
+history=model.fit_generator(training_generator,samples_per_epoch=40, nb_epoch=200)
+model.save("/home/sayandip/model_sbx.h5")
 
  
